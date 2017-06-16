@@ -1,7 +1,7 @@
 @extends('adminlte::page')
 
 @section('htmlheader_title')
-    Admin | Categories
+    Admin | Posts
 @endsection
 
 
@@ -9,9 +9,9 @@
     <div class="row">
         <div  class="col-md-12">
             <h1 class="bordered-heading">
-                All Categories
+                All Posts
             </h1>
-            <a style="margin-bottom: 20px;" href="/admin/categories/new-category" class="btn btn-primary"> New Category </a>
+            <a style="margin-bottom: 20px;" href="/admin/posts/new-post" class="btn btn-primary"> New Post </a>
             <table class="table table-striped">
                 <thead>
                 <th>
@@ -31,6 +31,9 @@
                 </th>
                 <th>
                     Description (Ar)
+                </th>
+                <th>
+                    Image
                 </th>
                 <th colspan="2">
                     Actions
@@ -56,6 +59,9 @@
                         </td>
                         <td>
                             {{$post->translate('ar')->description}}
+                        </td>
+                        <td>
+                            <img src="{{route("image", [$post->image])}}" style="width:auto;height:50px;display: block;text-align:center;margin-right:auto;margin-left:auto" alt="No image provided">
                         </td>
                         <td>
                             <a href="/admin/posts/{{$post->id}}/edit" class="btn btn-warning"> Edit </a>

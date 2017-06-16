@@ -11,6 +11,7 @@ use App\Category;
 use App\Http\Requests;
 use App\Post;
 use App\User;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 
 /**
@@ -186,11 +187,11 @@ class AdminController extends Controller
             ]);
     }
 
-    public function deletePost($cat){
-        $cat = Category::find($cat);
+    public function deletePost($post){
+        $post = Post::find($post);
         try {
-            $cat->deleteTranslations();
-            $cat->delete();
+            $post->deleteTranslations();
+            $post->delete();
         }
         catch (\Exception $e){
         }
@@ -200,33 +201,48 @@ class AdminController extends Controller
 
     public function newPost(){
         if(\Auth::user()->id == 1) {
-            return view('admin.new-category');
+            return view('admin.new-post');
         }
         else {
             return response()->view("vendor.adminlte.errors.403", [], 403);
         }
     }
 
-    public function createPost(Requests\CategoryRequest $request){
+    public function createPost(Requests\PostRequest $request){
         $data = $request->all();
-        $category = new Category;
-        $category->save();
+        $post = new Post;
+        $user = \Auth::user();
+        $post->user()->associate($user);
+
+        $post->category()->associate(Category::find($request->category));
 
         foreach (['en', 'ar'] as $locale) {
-            $category->translateOrNew($locale)->name = $data[$locale]['name'];
-            $category->translateOrNew($locale)->slug = $data[$locale]['slug'];
+            $post->translateOrNew($locale)->title = $data[$locale]['title'];
+            $post->translateOrNew($locale)->description = $data[$locale]['description'];
         }
 
-        $category->save();
+        $upload_to = resource_path("img");
 
-        return redirect('/admin/categories');
+        $image = $request->image;
+        $rules = array('file' => 'mimes:png,jpeg');
+        $validator = Validator::make(array('file' => $image), $rules);
+        if ($validator->passes() || true) {
+            $filename = $image->getClientOriginalName();
+            $fileNameStored = sha1(\Auth::user()->email . (string)time() . $filename);
+            $upload_success = $image->move($upload_to, $fileNameStored);
+        }
+        $post->image = $fileNameStored;
+
+        $post->save();
+
+        return redirect('/admin/posts');
     }
 
 
-    public function editPost(Category $category){
+    public function editPost(Post $post){
         if(\Auth::user()->id == 1) {
-            return view('admin.edit-category',[
-                'category' => $category,
+            return view('admin.edit-post',[
+                'post' => $post,
             ]);
         }
         else {
@@ -234,15 +250,32 @@ class AdminController extends Controller
         }
     }
 
-    public function updatePost(Requests\EditCategoryRequest $request, Category $category){
+    public function updatePost(Requests\EditPostRequest $request, Post $post){
         if(\Auth::user()->id == 1) {
             $data = $request->all();
+
+            $post->category_id = Category::find($request->category)->id;
+
             foreach (['en', 'ar'] as $locale) {
-                $category->translateOrNew($locale)->name = $data[$locale]['name'];
-                $category->translateOrNew($locale)->slug = $data[$locale]['slug'];
+                $post->translateOrNew($locale)->title = $data[$locale]['title'];
+                $post->translateOrNew($locale)->description = $data[$locale]['description'];
             }
-            $category->save();
-            return redirect()->action("AdminController@listCategories");
+
+            $upload_to = resource_path("img");
+
+            $image = $request->image;
+            if($image !== null) {
+                $rules = array('file' => 'mimes:png,jpeg');
+                $validator = Validator::make(array('file' => $image), $rules);
+                if ($validator->passes() || true) {
+                    $filename = $image->getClientOriginalName();
+                    $fileNameStored = sha1(\Auth::user()->email . (string)time() . $filename);
+                    $upload_success = $image->move($upload_to, $fileNameStored);
+                }
+                $post->image = $fileNameStored;
+            }
+            $post->save();
+            return redirect()->action("AdminController@listPosts");
         }
         else {
             return response()->view("vendor.adminlte.errors.403", [], 403);
