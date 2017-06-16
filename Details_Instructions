@@ -1,0 +1,40 @@
+Here's Laravel documentation and Laravel Packages to be used at this task
+
+Laravel documentation https://laravel.com/docs/5.4 (read Setup, The Basics)
+For localization use https://github.com/mcamara/laravel-localization
+For translation use https://github.com/dimsav/laravel-translatable
+
+Task Details
+
+There’s Admin Area which will have: (find HTML template here: https://drive.google.com/file/d/0B70kKr4PaNRzRHJWdG9lTVhtUGc/view?usp=sharing)
+Login Page
+Dashboard have 3 menus
+
+Users (CURD)
+First Name
+Last Name
+E-mail
+Password
+
+Categories (CURD)
+Slug
+English Name
+Arabic Name
+
+Posts (CURD)
+Category
+English Title
+Arabic Title
+Image
+English Description
+Arabic Description
+
+Note that categories and posts modules are translatable (so don’t forget to use Translation packages referenced above).
+
+Frontend: (there’s no design so feel free whatever you want even HTML without any styling)
+List of categories
+When you click on any category this will redirect you to this category page which list all posts under this category (use pagination: 10 posts by page)
+Post will include Title and just 10 words from description and read more button.
+when you click on read more button for any post listed at category page this will redirect to single post page which include chosen Post Title, Image, Description.
+
+Note that Frontend in 2 languages (English  and Arabic) so make sure that you display content in a proper language. (Use localization package referenced above to manage languages and translation package referenced above to display content in a proper language).
